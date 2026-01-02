@@ -1,0 +1,27 @@
+Hugging Face Space Configuration Summary
+=========================================
+
+REQUIRED for File Operations:
+------------------------------
+API_ID=123456
+API_HASH=your_api_hash
+BOT_SESSIONS=bot.session
+STORAGE_CHANNEL=-100123456789
+DATABASE_BACKUP_MSG_ID=123
+ADMIN_PASSWORD=your_password
+
+NOTE: You need to upload cache/bot.session file to your Hugging Face Space
+      (since cache/ is gitignored, upload it manually or temporarily remove from .gitignore)
+
+OPTIONAL - For Bot Mode (users can upload files via Telegram bot):
+-------------------------------------------------------------------
+MAIN_BOT_TOKEN=your_main_bot_token
+TELEGRAM_ADMIN_IDS=123456789,987654321
+
+NOTE: MAIN_BOT_TOKEN will automatically create main_bot.session file
+      You DON'T need to provide a session file for this - just the token!
+
+OPTIONAL - For Premium (files > 2GB):
+-------------------------------------
+STRING_SESSIONS=your_string_session_here
+
