@@ -1,4 +1,5 @@
 import asyncio
+import pyromod
 from pyrogram import Client, filters
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 import config
