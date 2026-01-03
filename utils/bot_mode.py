@@ -57,11 +57,18 @@ async def set_folder_handler(client: Client, message: Message):
 
     while True:
         try:
-            folder_name = await message.ask(
-                "Send the folder name where you want to upload files\n\n/cancel to cancel",
-                timeout=60,
-                filters=filters.text,
-            )
+            sent = await message.reply_text(
+    "Send the folder name where you want to upload files\n\n/cancel to cancel"
+)
+try:
+    folder_name = await client.listen(
+        message.chat.id,
+        timeout=60,
+        filters=filters.text,
+    )
+except asyncio.TimeoutError:
+    await message.reply_text("Timeout\n\nUse /set_folder to set folder again")
+    return
         except asyncio.TimeoutError:
             await message.reply_text("Timeout\n\nUse /set_folder to set folder again")
             return
