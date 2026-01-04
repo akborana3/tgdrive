@@ -1,5 +1,5 @@
 import asyncio
-from pyromod import listen
+import pyromod
 from pyrogram import Client, filters
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 import config
@@ -57,18 +57,11 @@ async def set_folder_handler(client: Client, message: Message):
 
     while True:
         try:
-            sent = await message.reply_text(
-    "Send the folder name where you want to upload files\n\n/cancel to cancel"
-)
-try:
-    folder_name = await client.listen(
-        message.chat.id,
-        timeout=60,
-        filters=filters.text,
-    )
-except asyncio.TimeoutError:
-    await message.reply_text("Timeout\n\nUse /set_folder to set folder again")
-    return
+            folder_name = await message.ask(
+                "Send the folder name where you want to upload files\n\n/cancel to cancel",
+                timeout=60,
+                filters=filters.text,
+            )
         except asyncio.TimeoutError:
             await message.reply_text("Timeout\n\nUse /set_folder to set folder again")
             return
@@ -196,15 +189,10 @@ async def start_bot_mode(d, b):
     BOT_MODE = b
 
     logger.info("Starting Main Bot")
-    try:
-        await main_bot.start()
-        await main_bot.send_message(
-            config.STORAGE_CHANNEL, "Main Bot Started -> TG Drive's Bot Mode Enabled"
-        )
-        logger.info("Main Bot Started")
-        logger.info("TG Drive's Bot Mode Enabled")
-    except Exception as e:
-        error_msg = str(e) if str(e) else repr(e)
-        logger.error(f"Failed to start Main Bot: {error_msg}")
-        logger.warning("Bot Mode will not be available - Main Bot connection failed")
-        # Don't raise - allow the app to continue without bot mode
+    await main_bot.start()
+
+    await main_bot.send_message(
+        config.STORAGE_CHANNEL, "Main Bot Started -> TG Drive's Bot Mode Enabled"
+    )
+    logger.info("Main Bot Started")
+    logger.info("TG Drive's Bot Mode Enabled")
