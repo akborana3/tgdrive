@@ -1,6 +1,6 @@
 import asyncio
-import pyromod
 from pyrogram import Client, filters
+import pyromod
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 import config
 from utils.logger import Logger
@@ -57,7 +57,8 @@ async def set_folder_handler(client: Client, message: Message):
 
     while True:
         try:
-            folder_name = await message.ask(
+            folder_name = await client.ask(
+                message.chat.id,
                 "Send the folder name where you want to upload files\n\n/cancel to cancel",
                 timeout=60,
                 filters=filters.text,
