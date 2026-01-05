@@ -5,7 +5,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>TG Drive</title>
-    <link rel="stylesheet" href="static/home.css" />
+    <link rel="stylesheet" href="static/home.css?v=2" />
 
     <!-- Fonts Start -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -125,6 +125,19 @@
         <!-- Main Content Start -->
         <div class="main-content">
             <div class="header">
+                <button id="sidebar-toggle-btn" class="theme-toggle-btn" title="Toggle Sidebar"
+                    style="margin-right: 10px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" fill="#444746">
+                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" />
+                    </svg>
+                </button>
+                <button id="theme-toggle-btn" class="theme-toggle-btn" title="Toggle Theme">
+                    <svg id="theme-icon" xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"
+                        fill="#444746">
+                        <path
+                            d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-2.98 0-5.4-2.42-5.4-5.4 0-1.81.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z" />
+                    </svg>
+                </button>
                 <div class="search-bar">
                     <img src="static/assets/search-icon.svg" />
                     <form id="search-form">
@@ -148,11 +161,11 @@
             </div>
         </div>
     </div>
-    <script src="static/js/extra.js"></script>
-    <script src="static/js/apiHandler.js"></script>
-    <script src="static/js/sidebar.js"></script>
-    <script src="static/js/fileClickHandler.js"></script>
-    <script src="static/js/main.js"></script>
+    <script src="static/js/extra.js?v=2"></script>
+    <script src="static/js/apiHandler.js?v=2"></script>
+    <script src="static/js/sidebar.js?v=2"></script>
+    <script src="static/js/fileClickHandler.js?v=2"></script>
+    <script src="static/js/main.js?v=2"></script>
 </body>
 
 </html>
