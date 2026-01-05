@@ -1,123 +1,286 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TG Drive - Video Player</title>
 
     <link href="//vjs.zencdn.net/8.3.0/video-js.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/videojs-seek-buttons/3.0.1/videojs-seek-buttons.min.css" rel="stylesheet">
+
     <script src="//vjs.zencdn.net/8.3.0/video.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/videojs-seek-buttons/3.0.1/videojs-seek-buttons.min.js"></script>
+    
     <style>
+        /* Modern Reset & Base Styles */
         body {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
-            font-family: Arial, sans-serif;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: #0f172a;
+            background-image: 
+                radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
+                radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
+                radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
+            color: #ffffff;
+            user-select: none; /* Prevents text selection on double tap */
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 24px;
+            width: 90%;
+            max-width: 960px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
         }
 
         .video-container {
-            width: 90%;
-            max-width: 800px;
+            width: 100%;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            position: relative; /* For double tap overlay */
         }
 
-        .buttons-container {
-            margin-top: 20px;
+        /* --- Custom Video.js Styling --- */
+        
+        /* Center Play Button */
+        .video-js .vjs-big-play-button {
+            background-color: rgba(59, 130, 246, 0.9);
+            border: none;
+            width: 80px;
+            height: 80px;
+            line-height: 80px;
+            border-radius: 50%;
+            margin-left: -40px;
+            margin-top: -40px;
+            transition: all 0.3s ease;
+        }
+        .video-js .vjs-big-play-button:hover {
+            background-color: #2563eb;
+            transform: scale(1.1);
+        }
+
+        /* Control Bar Transparency */
+        .video-js .vjs-control-bar {
+            background-color: rgba(15, 23, 42, 0.85);
+            border-radius: 0 0 16px 16px;
+        }
+
+        /* Seek Buttons Styling */
+        .video-js .vjs-seek-button {
+            font-size: 1.2em;
+            cursor: pointer;
+        }
+
+        /* Speed Menu Styling */
+        .video-js .vjs-playback-rate .vjs-playback-rate-value {
+            line-height: 30px;
+            font-weight: bold;
+        }
+
+        /* --- Double Tap Overlay Animation --- */
+        .double-tap-overlay {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 40%;
             display: flex;
-            justify-content: space-evenly;
-            width: 90%;
-            max-width: 800px;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none; /* Let clicks pass through if needed, but we handle via JS */
+            color: rgba(255,255,255,0.8);
+            font-size: 40px;
+        }
+        .dt-left { left: 0; background: linear-gradient(90deg, rgba(0,0,0,0.3), transparent); }
+        .dt-right { right: 0; background: linear-gradient(-90deg, rgba(0,0,0,0.3), transparent); }
+        
+        .dt-icon {
+            background: rgba(0,0,0,0.5);
+            border-radius: 50%;
+            padding: 15px;
+            display: none; /* Hidden by default */
+        }
+
+        /* Buttons Area */
+        .buttons-container {
+            display: flex;
+            gap: 16px;
+            width: 100%;
+            justify-content: center;
+            flex-wrap: wrap;
         }
 
         .copy-button {
-            padding: 10px 20px;
-            font-size: 16px;
+            padding: 14px 28px;
+            font-size: 15px;
+            font-weight: 600;
             cursor: pointer;
-            background-color: #007bff;
+            background: rgba(255, 255, 255, 0.1);
             color: white;
-            border: none;
-            border-radius: 5px;
-            transition: background-color 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-width: 180px;
         }
 
         .copy-button:hover {
-            background-color: #0056b3;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .copy-button.success {
+            background-color: #10b981;
+            border-color: #10b981;
         }
     </style>
 </head>
 
 <body>
 
-    <div class="video-container">
-        <video id="my-player" class="video-js vjs-fluid" controls preload="auto" data-setup='{}'>
-            <source id="video-src" src="" type="video/mp4">
-            </source>
-            <p class="vjs-no-js">
-                To view this video please enable JavaScript, and consider upgrading to a
-                web browser that
-                <a href="https://videojs.com/html5-video-support/" target="_blank">
-                    supports HTML5 video
-                </a>
-            </p>
-        </video>
-    </div>
+    <div class="glass-panel">
+        <div class="video-container" id="video-wrapper">
+            
+            <div class="double-tap-overlay dt-left" id="dt-left">
+                <div class="dt-icon">⏪ 10s</div>
+            </div>
+            <div class="double-tap-overlay dt-right" id="dt-right">
+                <div class="dt-icon">10s ⏩</div>
+            </div>
 
-    <div class="buttons-container">
-        <button class="copy-button" onclick="copyStreamUrl()">Copy Stream URL</button>
-        <button class="copy-button" onclick="copyDownloadUrl()">Copy Download URL</button>
+            <video id="my-player" class="video-js vjs-fluid vjs-big-play-centered" controls preload="auto" 
+                data-setup='{"playbackRates": [0.5, 1, 1.25, 1.5, 2]}'>
+                <source id="video-src" src="" type="video/mp4">
+                </source>
+                <p class="vjs-no-js">
+                    To view this video please enable JavaScript.
+                </p>
+            </video>
+        </div>
+
+        <div class="buttons-container">
+            <button class="copy-button" onclick="copyStreamUrl(this)">
+                Copy Stream URL
+            </button>
+            <button class="copy-button" onclick="copyDownloadUrl(this)">
+                Copy Download URL
+            </button>
+        </div>
     </div>
 
     <script>
+        // 1. Get URL and Set Source
         const downloadUrl = (new URL(window.location.href)).searchParams.get('url');
         document.getElementById('video-src').src = downloadUrl;
 
+        // 2. Initialize Video.js Features
+        const player = videojs('my-player');
 
-        function copyTextToClipboard(text) {
+        player.ready(function() {
+            // Enable the Seek Buttons Plugin (Forward/Back 10s)
+            player.seekButtons({
+                forward: 10,
+                back: 10
+            });
+        });
+
+        // 3. Custom Double Tap Logic
+        const wrapper = document.getElementById('video-wrapper');
+        const dtLeft = document.getElementById('dt-left');
+        const dtRight = document.getElementById('dt-right');
+        let lastTapTime = 0;
+        
+        // Listen for taps on the wrapper (captures clicks over the video)
+        wrapper.addEventListener('click', function(e) {
+            const currentTime = new Date().getTime();
+            const tapLength = currentTime - lastTapTime;
+            
+            // If double tap (less than 300ms between taps)
+            if (tapLength < 300 && tapLength > 0) {
+                const rect = wrapper.getBoundingClientRect();
+                const x = e.clientX - rect.left; // Click position inside video
+                
+                // Check if click is on Left (0-40%) or Right (60-100%) side
+                if (x < rect.width * 0.4) {
+                    // Rewind
+                    player.currentTime(player.currentTime() - 10);
+                    showDoubleTapEffect(dtLeft);
+                } else if (x > rect.width * 0.6) {
+                    // Forward
+                    player.currentTime(player.currentTime() + 10);
+                    showDoubleTapEffect(dtRight);
+                }
+                e.preventDefault(); // Stop default play/pause on the second click
+            }
+            lastTapTime = currentTime;
+        });
+
+        function showDoubleTapEffect(element) {
+            const icon = element.querySelector('.dt-icon');
+            element.style.opacity = '1';
+            icon.style.display = 'block';
+            
+            setTimeout(() => {
+                element.style.opacity = '0';
+                setTimeout(() => { icon.style.display = 'none'; }, 200);
+            }, 500);
+        }
+
+        // 4. Clipboard Logic (Same as before)
+        function copyTextToClipboard(text, btnElement) {
             if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(text).then(function () {
-                    alert('Link copied to clipboard!');
-                }).catch(function (err) {
-                    console.error('Could not copy text: ', err);
-                    fallbackCopyTextToClipboard(text);
-                });
+                navigator.clipboard.writeText(text).then(() => animateButton(btnElement))
+                .catch(() => fallbackCopyTextToClipboard(text, btnElement));
             } else {
-                fallbackCopyTextToClipboard(text);
+                fallbackCopyTextToClipboard(text, btnElement);
             }
         }
 
-        function fallbackCopyTextToClipboard(text) {
+        function fallbackCopyTextToClipboard(text, btnElement) {
             const textArea = document.createElement('textarea');
             textArea.value = text;
             document.body.appendChild(textArea);
-            textArea.focus();
             textArea.select();
-
             try {
-                const successful = document.execCommand('copy');
-                if (successful) {
-                    alert('Link copied to clipboard!');
-                } else {
-                    alert('Failed to copy the link.');
-                }
-            } catch (err) {
-                console.error('Fallback: Oops, unable to copy', err);
-            }
-
+                if (document.execCommand('copy')) animateButton(btnElement);
+                else alert('Failed to copy');
+            } catch (e) {}
             document.body.removeChild(textArea);
         }
 
-        function copyStreamUrl() {
-            copyTextToClipboard(window.location.href);
+        function animateButton(btn) {
+            const originalText = btn.innerText;
+            btn.classList.add('success');
+            btn.innerText = "Copied!";
+            setTimeout(() => {
+                btn.classList.remove('success');
+                btn.innerText = originalText;
+            }, 2000);
         }
 
-        function copyDownloadUrl() {
-            copyTextToClipboard(downloadUrl);
-        }
+        function copyStreamUrl(btn) { copyTextToClipboard(window.location.href, btn); }
+        function copyDownloadUrl(btn) { copyTextToClipboard(downloadUrl, btn); }
     </script>
 
 </body>
-
 </html>
