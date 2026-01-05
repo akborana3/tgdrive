@@ -15,6 +15,7 @@ class ByteStreamer:
         self.clean_timer = 30 * 60
         self.client: Client = client
         self.cached_file_ids: Dict[int, FileId] = {}
+        self.dc_options = None
         asyncio.create_task(self.clean_cache())
 
     async def get_file_properties(self, channel, message_id: int) -> FileId:
@@ -38,12 +39,33 @@ class ByteStreamer:
         media_session = client.media_sessions.get(file_id.dc_id, None)
 
         if media_session is None:
+            if not self.dc_options:
+                config = await client.invoke(raw.functions.help.GetConfig())
+                self.dc_options = config.dc_options
+
+            ip = None
+            port = None
+            for option in self.dc_options:
+                if option.id == file_id.dc_id and not option.ipv6 and not option.cdn and not option.media_only:
+                    ip = option.ip_address
+                    port = option.port
+                    break
+            
+            if not ip:
+                for option in self.dc_options:
+                    if option.id == file_id.dc_id and not option.ipv6 and not option.cdn:
+                        ip = option.ip_address
+                        port = option.port
+                        break
+
             if file_id.dc_id != await client.storage.dc_id():
                 media_session = Session(
                     client,
                     file_id.dc_id,
+                    ip,
+                    port,
                     await Auth(
-                        client, file_id.dc_id, await client.storage.test_mode()
+                        client, file_id.dc_id, ip, port, await client.storage.test_mode()
                     ).create(),
                     await client.storage.test_mode(),
                     is_media=True,
@@ -74,6 +96,8 @@ class ByteStreamer:
                 media_session = Session(
                     client,
                     file_id.dc_id,
+                    ip,
+                    port,
                     await client.storage.auth_key(),
                     await client.storage.test_mode(),
                     is_media=True,
