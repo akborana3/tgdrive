@@ -1,0 +1,26 @@
+name: Sync to HuggingFace
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0   # 🔥 IMPORTANT FIX
+
+      - name: Sync to HF
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          git config --global user.email "action@github.com"
+          git config --global user.name "github-actions"
+
+          git remote add hf https://akborana4:$HF_TOKEN@huggingface.co/spaces/Akborana4/tgdrive
+          
+          git push hf main --force
