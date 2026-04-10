@@ -208,18 +208,38 @@
                 </button>
             </div>
 
-            <div class="directory">
-                <table>
-                    <thead>
-                        <tr>
-                            <th class="sortable" onclick="sortTable(0)">Name <span class="sort-icon">⇅</span></th>
-                            <th class="sortable" onclick="sortTable(1)">File Size <span class="sort-icon">⇅</span></th>
-                            <th>More</th>
-                        </tr>
-                    </thead>
-                    <tbody id="directory-data"></tbody>
-                </table>
+
+            <div class="view-toolbar">
+                <div class="sort-dropdown">
+                    <button class="glass-btn sort-btn">Sort By <span class="sort-icon"></span></button>
+                    <div class="dropdown-content">
+                        <a href="#" onclick="handleSort('name_asc')">Name (A-Z)</a>
+                        <a href="#" onclick="handleSort('name_desc')">Name (Z-A)</a>
+                        <a href="#" onclick="handleSort('date_desc')">Date (Newest)</a>
+                        <a href="#" onclick="handleSort('date_asc')">Date (Oldest)</a>
+                        <a href="#" onclick="handleSort('size_desc')">Size (Largest)</a>
+                        <a href="#" onclick="handleSort('size_asc')">Size (Smallest)</a>
+                    </div>
+                </div>
+                <div class="view-toggles">
+                    <button id="view-list-btn" class="glass-btn view-btn active" title="List View">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" fill="currentColor"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>
+                    </button>
+                    <button id="view-grid-btn" class="glass-btn view-btn" title="Grid View">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" fill="currentColor"><path d="M4 11h5V5H4v6zm0 7h5v-6H4v6zm6 0h5v-6h-5v6zm6 0h5v-6h-5v6zm-6-7h5V5h-5v6zm6-6v6h5V5h-5z"/></svg>
+                    </button>
+                </div>
             </div>
+
+            <div class="directory list-view" id="directory-container">
+                <div id="skeleton-container" style="display: none;">
+                    <!-- Skeletons will be injected here -->
+                </div>
+                <div id="directory-data" class="view-container">
+                    <!-- Items will be injected here -->
+                </div>
+            </div>
+
         </div>
     </div>
     
@@ -234,41 +254,6 @@
     <script src="static/js/main.js?v=2"></script>
 
     <script>
-        // --- 1. Sorting Logic ---
-        let sortDirection = 1; // 1 for asc, -1 for desc
-
-        function sortTable(n) {
-            const tableBody = document.getElementById("directory-data");
-            const rows = Array.from(tableBody.rows);
-            
-            sortDirection *= -1; // Toggle direction
-
-            rows.sort((a, b) => {
-                let x = a.getElementsByTagName("TD")[n].innerText.trim();
-                let y = b.getElementsByTagName("TD")[n].innerText.trim();
-
-                // If sorting File Size (Column 1)
-                if (n === 1) {
-                    return (parseSize(x) - parseSize(y)) * sortDirection;
-                }
-
-                // Default Name sorting
-                return x.toLowerCase().localeCompare(y.toLowerCase()) * sortDirection;
-            });
-
-            // Re-append rows in new order
-            rows.forEach(row => tableBody.appendChild(row));
-        }
-
-        // Helper to convert "10 MB", "2 KB" to bytes
-        function parseSize(sizeStr) {
-            if (!sizeStr || sizeStr === '-') return 0;
-            const units = {'B': 1, 'KB': 1024, 'MB': 1024**2, 'GB': 1024**3, 'TB': 1024**4};
-            const match = sizeStr.match(/([\d.]+)\s*([a-zA-Z]+)/);
-            if (!match) return 0;
-            return parseFloat(match[1]) * (units[match[2].toUpperCase()] || 1);
-        }
-
         // --- 2. Mobile Sidebar Logic ---
         const sidebar = document.querySelector('.sidebar');
         const overlay = document.getElementById('mobile-overlay');

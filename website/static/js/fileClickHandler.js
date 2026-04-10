@@ -27,7 +27,7 @@ function openMoreButton(div) {
     const moreDiv = document.getElementById(`more-option-${id}`)
 
     const rect = div.getBoundingClientRect();
-    const x = rect.left + window.scrollX - 40;
+    const x = rect.left + window.scrollX - 100;
     const y = rect.top + window.scrollY;
 
     moreDiv.style.zIndex = 2

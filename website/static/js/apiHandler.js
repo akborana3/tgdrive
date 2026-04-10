@@ -35,6 +35,7 @@ async function getCurrentDirectory() {
         const auth = getFolderAuthFromPath()
         console.log(path)
 
+        if(typeof showSkeleton === 'function') showSkeleton();
         const data = { 'path': path, 'auth': auth }
         const json = await postJson('/api/getDirectory', data)
 
